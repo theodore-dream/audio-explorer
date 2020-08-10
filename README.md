@@ -1,2 +1,2 @@
 # audio-explorer
-an audio toy, the success of emotion-audio-toy
+an audio toy, the successor of emotion-audio-toy
