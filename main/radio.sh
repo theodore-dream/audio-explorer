@@ -103,7 +103,7 @@ fi
 #elif which mpg123 > /dev/null; then
 #	mpg123 $URL
 if which vlc > /dev/null; then
-	vlc -I dummy -V none $URL &> /dev/null;
+	vlc -I dummy -V none $URL;
 elif which totem > /dev/null; then
 	(totem $URL &> /dev/null &)
 elif which audacious > /dev/null; then
