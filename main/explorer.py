@@ -42,6 +42,8 @@ x = 0
 URL_list = []
 text_list = []
 subtext_list = []
+key_list = []
+track_list = []
 
 for child in root.iter('outline'): 
     x = x + 1
@@ -55,11 +57,34 @@ for child in root.iter('outline'):
     if 'subtext' in child.attrib:
         subtext = child.attrib['subtext']
         subtext_list.append(subtext)
+    if 'key' in child.attrib:
+        key = child.attrib['key']
+        key_list.append(key)
+    if 'current_track' in child.attrib:
+        track = child.attrib['current_track']
+        track_list.append(track) 
+    print(x)     	
 
-print(URL_list)
-print(text_list)
-print(subtext_list)
+
+
+for x in range(500):
+  x = x + 1
+  print("=========================================================")
+  print("Station number " + str(x))
+  print("=========================================================")
+  print(text_list[x])
+  print(subtext_list[x])
+  print(track_list[x])
+  print(URL_list[x])
+done
+
+URL_list.count(x)
+#print(URL_list)
+#print(text_list)
+#print(subtext_list)
+#print(key)
+#print(track_list)
   
-print(URL_list[22])
-print(text_list[22])
-print(subtext_list[22])
+#print(URL_list[22])
+#print(text_list[22])
+#print(subtext_list[22])

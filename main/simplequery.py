@@ -5,7 +5,7 @@
 import subprocess
 import requests
 
-payload = {'sports'}
-r = requests.get('http://opml.radiotime.com/Search.ashx?query=' + str(payload))
-print(r.content)
+query = {'animals'}
+r = requests.get('http://opml.radiotime.com/Search.ashx?query=' + str(query))
+print(r.text)
 #print(r.headers)
