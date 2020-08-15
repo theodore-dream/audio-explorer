@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 # this is basically a python version of this bash script with custom additions for my purposes
 # https://gist.github.com/andersan/3f619becaebb7bb53c20c1772a77c3f9/revisions
 
-payload = {'music'}
+payload = {'sci fi'}
 r = requests.get('http://opml.radiotime.com/Search.ashx?query=' + str(payload))
 #print(r.text)
 #print(r.headers)
