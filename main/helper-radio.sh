@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# this was cloned from here: https://gist.github.com/xndc/c732204e274743204f1f
 # tunejack.sh uses the TuneIn public API (at opml.radiotime.com) to search for
 # a radio station, print out its details and try to play it somehow.
 

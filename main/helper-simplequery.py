@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# simple HTTP requests command to API 
+# simple HTTP requests command to TuneIn API - this is a development/debugger helper utility
 
 import subprocess
 import requests

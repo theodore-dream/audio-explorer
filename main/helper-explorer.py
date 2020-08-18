@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# this is now a helper utility that lets me see structured output for radio stations
 # testing xml structuring before trying to do anything else with api output 
 # https://docs.python.org/3/library/xml.etree.elementtree.html
 
