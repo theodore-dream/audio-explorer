@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 import random
 import shlex
 from shlex import split
-import vlc
 
 
 # specify the search query and send http request to TuneIn API 
@@ -32,19 +31,11 @@ def xml_parse(raw_query_result):
     track_list = []
     return root
 
-# setting a global variable for line_no to capture how many station results we get
-
-def line_number_set():
-   global line_no
-   line_no  = 0 
-
-line_number_set()
-
 # for loop going through each string in 'outline' from the XML output 
 # and appending each string to the respective list variable
 
 def iterate(set_root):
-    URL_list, text_list, subtext_list, key_list, track_list = [], [], [], [], []
+    URL_list, text_list, subtext_list, key_list, track_list, station_data = [], [], [], [], [], []
     root = set_root 
     for child in root.iter('outline'): 
         line_no = 0
@@ -64,61 +55,47 @@ def iterate(set_root):
         if 'current_track' in child.attrib:
             track = child.attrib['current_track']
             track_list.append(track) 
-    child_lists = ([URL_list], [text_list], [subtext_list], [key_list], [track_list])
-    return child_lists
+    return URL_list, text_list, subtext_list, key_list, track_list
 
-# selecting my random radio station
+# selecting my random radio station - we're going to need URL_list and selected 
 
-def randomselect(child_lists): 
-    print(child_lists[0])
-    total_stations = child_lists[0].count
-    print(total_stations(int))
-    #line_no = random.randrange(1, line_no, 1)
-    #print("=========================================================")
-    #print("Station " + str(line_no) + " randomly selected out of " + str(total_stations) + " total stations found") # add function here for the keyword used for the search?
-    #print("=========================================================")
-    #print("Station Name: " + text_list[(line_no)]) 
-    #print("---------------------------------------------------------")
-    #print("Note: " + subtext_list[line_no]) 
-    #print("URL: " + URL_list[line_no])
+def randomselect(URL_list, text_list, subtext_list, key_list, track_list):    
+    while True:      # [I can later add a button to interrupt this]
+        try:        
+            total_stations = len(URL_list)
+            selected = random.randrange(1, total_stations, 1)
+            print("=========================================================")
+            print("Station " + str(selected) + " randomly selected out of " + str(total_stations) + " total stations found") # add function here for the keyword used for the search?
+            print("=========================================================")
+            print("Station Name: " + text_list[(selected)])  
+            print("---------------------------------------------------------")
+            print("Note: " + subtext_list[selected]) 
+            print("URL: " + URL_list[selected])
+            url = requests.get(URL_list[(selected)])
+            print(url.text)
+        except: 
+            print('done')
+#                cmd = "'cvlc -I dummy --no-video --aout=alsa --alsa-audio-device default --file-logging --logfile=vlc-log.txt --verbose 3 ' +  str(url)"
+#                args = shlex.split(cmd)
+#                print(args)
+#                 subprocess.run(args, shell=False) 
+#            except subprocess.TimeoutExpired:
+#                print("connection timeout") 
+    print('all done, bye')
 
-
-def gather():
+def gather_stream():
     # first we get raw xml from tunein query 
     raw_query_result = tunein_query()
     # then we set the root of the xml document and create empty list variables
     set_root = xml_parse(raw_query_result)
     # then iterate through the xml document children of 'outline' where the tunein results are
     # place the lists that we created into a list of lists 
-    child_lists = iterate(set_root)
-    # now we place those child lists into randomselect function
-    randomselect(child_lists)
+    [URL_list, text_list, subtext_list, key_list, track_list] = iterate(set_root)
+    # now we place those child lists into randomselect function and print what we've selected
+    randomselect(URL_list, text_list, subtext_list, key_list, track_list)
 
-gather()
 
-def stream():
-    
-   # get the actual url
-   url = requests.get(URL_list[(line_no)])
-   print(url.text)
-   #vlc_arg = 'vlc -I dummy --no-video --aout=alsa'
-   #vlc_arg = split(vlc_arg) 
-   #print(vlc_arg)
-   #media = instance.media_new(url.text)
-   #player.media_new_location(url.text)
-   #player.set_media(media)
-   
-   i = vlc.Instance("-I dummy --avcodec-dr --avcodec-workaround-bugs=1 --no-video --aout=alsa --file-logging --logfile=vlc-log.txt --verbose 3")
-   player = i.media_player_new()
-   Media = i.media_new(url.text)
-   Media.get_mrl()
-   player.set_media(Media)
-   #player.libvlc_media_new_location(url.txt)
-   player.play()
-
-#randomselect()
-#stream()
-
+gather_stream()
 
 
 
