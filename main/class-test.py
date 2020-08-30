@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-# this version of the script is basically barely working for the intended goal, but trying to increase code reusability and flexibility by moving away from only functions and also using classes
+# this is a test version to try to implement classes 
+
 # reference for xml module
 # https://docs.python.org/3/library/xml.etree.elementtree.html
 # this was originally based off of this script https://gist.github.com/andersan/3f619becaebb7bb53c20c1772a77c3f9/revisions
@@ -15,51 +16,74 @@ from shlex import split
 
 # specify the search query and send http request to TuneIn API 
 
-def tunein_query():
-    query = {'sci fi'}
-    r = requests.get('http://opml.radiotime.com/Search.ashx?query=' + str(query))
-    return r.content
+class XMLParse:
 
-def xml_parse(raw_query_result):
-    # set the XML document root of the http response XML page
-    root = ET.fromstring(raw_query_result)
-    # setting variables that hold empty lists so we can append strings to the list
-    x = 0 
-    URL_list = []
-    text_list = []
-    subtext_list = []
-    key_list = []
-    track_list = []
-    return root
+    def tunein_query():
+        query = {'sci fi'}
+        r = requests.get('http://opml.radiotime.com/Search.ashx?query=' + str(query))
+        response = r.content 
+        #return r.content
+    
+    def first_parse(raw_query_result):
+        # set the XML document root of the http response XML page
+        root = ET.fromstring(raw_query_result)
+        # setting variables that hold empty lists so we can append strings to the list
+        x = 0 
+        URL_list = []
+        text_list = []
+        subtext_list = []
+        key_list = []
+        track_list = []
+        return root
 
 # for loop going through each string in 'outline' from the XML output 
 # and appending each string to the respective list variable
 
-def iterate(set_root):
-    URL_list, text_list, subtext_list, key_list, track_list, station_data = [], [], [], [], [], []
-    root = set_root 
-    for child in root.iter('outline'): 
-        line_no = 0
-        line_no = line_no + 1
-        if 'URL' in child.attrib: 
-            URL = child.attrib['URL']
-            URL_list.append(URL)
-        if 'text' in child.attrib:
-            text = child.attrib['text']
-            text_list.append(text)
-        if 'subtext' in child.attrib:
-            subtext = child.attrib['subtext']
-            subtext_list.append(subtext)
-        if 'key' in child.attrib:
-            key = child.attrib['key']
-            key_list.append(key)
-        if 'current_track' in child.attrib:
-            track = child.attrib['current_track']
-            track_list.append(track) 
-    return URL_list, text_list, subtext_list, key_list, track_list
+    def iterate(set_root):
+        URL_list, text_list, subtext_list, key_list, track_list, station_data = [], [], [], [], [], []
+        root = set_root 
+        for child in root.iter('outline'): 
+            line_no = 0
+            line_no = line_no + 1
+            if 'URL' in child.attrib: 
+                URL = child.attrib['URL']
+                URL_list.append(URL)
+            if 'text' in child.attrib:
+                text = child.attrib['text']
+                text_list.append(text)
+            if 'subtext' in child.attrib:
+                subtext = child.attrib['subtext']
+                subtext_list.append(subtext)
+            if 'key' in child.attrib:
+                key = child.attrib['key']
+                key_list.append(key)
+            if 'current_track' in child.attrib:
+                track = child.attrib['current_track']
+                track_list.append(track) 
+        return URL_list, text_list, subtext_list, key_list, track_list
+
+# I need to verify that the stream is streamable
+
+    def random_verify(URL_list, text_list, subtext_list, key_list, track_list):    
+        try:        
+            total_stations = len(URL_list)
+            selected = random.randrange(1, total_stations, 1)
+            print("=========================================================")
+            print("Station " + str(selected) + " randomly selected out of " + str(total_stations) + " total stations found") # add function here for the keyword used for the search?
+            print("=========================================================")
+            print("Now Testing Station Name: " + text_list[(selected)])  
+            print("---------------------------------------------------------")
+            print("Note: " + subtext_list[selected]) 
+            print("URL: " + URL_list[selected])
+            url = requests.get(URL_list[(selected)])
+            url = url.text
+            print(url)
+        except:
+            print("done")
 
 # selecting my random radio station - we're going to need URL_list and selected 
- 
+#############################
+
 def stream(url):
     try:
         cmd = 'cvlc -I dummy --no-video --aout=alsa --alsa-audio-device default --file-logging --logfile=vlc-log.txt --verbose 3 ' + str(url)
@@ -95,7 +119,7 @@ def randomselect(URL_list, text_list, subtext_list, key_list, track_list):
             url = requests.get(URL_list[(selected)])
             url = url.text
             print(url)
-            stream()
+            stream
            #cmd = 'cvlc -I dummy --no-video --aout=alsa --alsa-audio-device default --file-logging --logfile=vlc-log.txt --verbose 3 ' +  str(url.text)
            #args = shlex.split(cmd)
            #print(args)
@@ -117,10 +141,19 @@ def gather_stream():
     randomselect(URL_list, text_list, subtext_list, key_list, track_list)
 
 
-gather_stream()
+#gather_stream()
 
+#######################
 
+def gather_stream2():
+    XMLParse.first_parse = XMLParse.tunein_query.response
+#    XMLParse.iterate(set_root) = XMLParse.first_parse
+    print(XMLParse.first_parse())
+    XMLParse.random_verify = XMLParse.iterate 
+    #[URL_list, text_list, subtext_list, key_list, track_list] = XMLParse.iterate(set_root)
+    #randomselect(URL_list, text_list, subtext_list, key_list, track_list)
 
+gather_stream2()
 
 
 

@@ -8,4 +8,3 @@ import vlc
 
 p = vlc.MediaPlayer('http://s1.voscast.com:8652')
 p.play()
-print(sys.executable)
