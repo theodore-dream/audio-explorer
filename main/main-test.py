@@ -16,7 +16,7 @@ from shlex import split
 # specify the search query and send http request to TuneIn API 
 
 def tunein_query():
-    query = {'sci fi'}
+    query = {'wxyc'}
     r = requests.get('http://opml.radiotime.com/Search.ashx?query=' + str(query))
     return r.content
 
