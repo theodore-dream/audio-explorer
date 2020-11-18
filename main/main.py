@@ -18,7 +18,7 @@ player = vlc.MediaPlayer("/usr/bin/vlc")
 #player = vlc.MediaPlayer(vlc.Instance("-I dummy --no-video --aout=alsa --file-logging --logfile=vlc.txt"))
 
 # specify the search query and send http request to TuneIn API 
-query = {'sci fi'}
+query = {'cat'}
 r = requests.get('http://opml.radiotime.com/Search.ashx?query=' + str(query))
 
 # set the XML document root of the http response XML page

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-# this version of the script is basically barely working for the intended goal, but trying to increase code reusability and flexibility by moving away from only functions and also using classes
+# for this test, just going to try to isolate how to cut out stations that are not live. if item=station, its live. if topic=topic, its a recorded episode
+
 # reference for xml module
 # https://docs.python.org/3/library/xml.etree.elementtree.html
 # this was originally based off of this script https://gist.github.com/andersan/3f619becaebb7bb53c20c1772a77c3f9/revisions
@@ -25,6 +26,7 @@ def xml_parse(raw_query_result):
     root = ET.fromstring(raw_query_result)
     # setting variables that hold empty lists so we can append strings to the list
     x = 0 
+    item_list = []
     URL_list = []
     text_list = []
     subtext_list = []
@@ -36,11 +38,14 @@ def xml_parse(raw_query_result):
 # and appending each string to the respective list variable
 
 def iterate(set_root):
-    URL_list, text_list, subtext_list, key_list, track_list, station_data = [], [], [], [], [], []
+    item_list, URL_list, text_list, subtext_list, key_list, track_list, station_data = [], [], [], [], [], [], []
     root = set_root 
     for child in root.iter('outline'): 
         line_no = 0
         line_no = line_no + 1
+        if 'item' in child.attrib:
+            item = child.attrib['item']
+            item_list.append(item)
         if 'URL' in child.attrib: 
             URL = child.attrib['URL']
             URL_list.append(URL)
@@ -56,43 +61,44 @@ def iterate(set_root):
         if 'current_track' in child.attrib:
             track = child.attrib['current_track']
             track_list.append(track) 
-    return URL_list, text_list, subtext_list, key_list, track_list
+    return item_list, URL_list, text_list, subtext_list, key_list, track_list
 
-# selecting my random radio station - we're going to need URL_list and selected 
- 
-def stream(url):
-    try:
-        cmd = 'cvlc -I dummy --no-video --aout=alsa --alsa-audio-device default --file-logging --logfile=vlc-log.txt --verbose 3 ' + str(url)
-        args = shlex.split(cmd)
-        print(args)
-        subprocess.run(args, shell=False)
-    except subprocess.TimeoutExpired:
-        print("connection timeout") 
+# this function seperates out anything that is not "item=station" which removes anything that isn't a live show 
 
+def stationsfilter(item_list, URL_list, text_list, subtext_list, key_list, track_list):
+    items, URLs, texts, subtexts, keys, tracks = [], [], [], [], [], []
+    for i in range(len(item_list)):
+       if (item_list[i]) == "topic":
+          continue
+       if (item_list[i]) == "show":
+          continue
+       items.append(item_list[i])
+       URLs.append(URL_list[i])
+       texts.append(text_list[i])
+       subtexts.append(subtext_list[i])
+      # keys.append(key_list[i])
+       tracks.append(track_list[i])
+       # this shows me only stations are returning
+       # print(items[i])
+       # print(URLs[i])
+    return items, URLs, texts, subtexts, keys, tracks       
+   
 
-def randomselect(URL_list, text_list, subtext_list, key_list, track_list):    
-
-    def stream():
-        try:
-            cmd = 'cvlc -I dummy --no-video --aout=alsa --alsa-audio-device default --file-logging --logfile=vlc-log.txt --verbose 3 ' + str(url)
-            args = shlex.split(cmd)
-            print(args)
-            subprocess.run(args, shell=False)
-        except subprocess.TimeoutExpired:
-            print("connection timeout")
+def randomselect(items, URLs, texts, subtexts, keys, tracks):    
     
-    while True:      # [I can later add a button to interrupt this]
+    while True:    
         try:        
-            total_stations = len(URL_list)
+            total_stations = len(URLs)
             selected = random.randrange(1, total_stations, 1)
             print("=========================================================")
             print("Station " + str(selected) + " randomly selected out of " + str(total_stations) + " total stations found") # add function here for the keyword used for the search?
             print("=========================================================")
-            print("Station Name: " + text_list[(selected)])  
+            print("Station Name: " + texts[(selected)])  
             print("---------------------------------------------------------")
-            print("Note: " + subtext_list[selected]) 
-            print("URL: " + URL_list[selected])
-            url = requests.get(URL_list[(selected)])
+            print("Station Type: " + items[selected])
+            print("Note: " + subtexts[selected]) 
+            print("URL: " + URLs[selected])
+            url = requests.get(URLs[(selected)])
             url = url.text
             print(url)
             stream()
@@ -112,10 +118,11 @@ def gather_stream():
     set_root = xml_parse(raw_query_result)
     # then iterate through the xml document children of 'outline' where the tunein results are
     # place the lists that we created into a list of lists 
-    [URL_list, text_list, subtext_list, key_list, track_list] = iterate(set_root)
-    # now we place those child lists into randomselect function and print what we've selected
-    randomselect(URL_list, text_list, subtext_list, key_list, track_list)
-
+    [item_list, URL_list, text_list, subtext_list, key_list, track_list] = iterate(set_root)
+    # now we filter those lists to check for what is a live station and what isn't
+    [items, URLs, texts, subtexts, keys, tracks] = stationsfilter(item_list, URL_list, text_list, subtext_list, key_list, track_list) 
+    # now we place these new filtered lists into randomselect function and print what we've selected
+    randomselect(items, URLs, texts, subtexts, keys, tracks)
 
 gather_stream()
 

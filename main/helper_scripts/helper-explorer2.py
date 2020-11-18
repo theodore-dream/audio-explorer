@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 # this is basically a python version of this bash script with custom additions for my purposes
 # https://gist.github.com/andersan/3f619becaebb7bb53c20c1772a77c3f9/revisions
 
-payload = {'washboard'}
+payload = {'pop'}
 r = requests.get('http://opml.radiotime.com/Search.ashx?query=' + str(payload))
 #print(r.text)
 #print(r.headers)
@@ -24,9 +24,9 @@ root = ET.fromstring(r.content)
 # this provides the topology elements, and each element contains attributes, 
 # seems all stations are under "outline" element
 
-#for child in root.iter('*'):
-#    print(child.tag, child.attrib)
-#    print(child.tag)
+# for child in root.iter('*'):
+#     print(child.tag, child.attrib)
+#     print(child.tag)
 
 # this provides child attributes under the element, it shows the stations under "outline element"
 
@@ -46,10 +46,13 @@ text_list = []
 subtext_list = []
 key_list = []
 track_list = []
+item_list = []
 
 for child in root.iter('outline'): 
     x = x + 1
-    print(x)
+    if 'item' in child.attrib: 
+        item = child.attrib['item']
+        item_list.append(item)           
     if 'URL' in child.attrib:
         URL = child.attrib['URL']
         URL_list.append(URL)
@@ -65,28 +68,34 @@ for child in root.iter('outline'):
     if 'current_track' in child.attrib:
         track = child.attrib['current_track']
         track_list.append(track) 
-    print(x)     	
+#    print(x)     	
 
-
+###
+    
 
 for x in range(500):
   x = x + 1
+  if (item_list[x]) == "topic":
+     continue
+  if (item_list[x]) == "show":
+     continue
   print("=========================================================")
   print("Station number " + str(x))
   print("=========================================================")
+  print(item_list[x])
   print(text_list[x])
   print(subtext_list[x])
   print(track_list[x])
   print(URL_list[x])
 done
 
-URL_list.count(x)
+#URL_list.count(x)
 #print(URL_list)
 #print(text_list)
 #print(subtext_list)
 #print(key)
 #print(track_list)
   
-#print(URL_list[22])
+#print(item_list[22])
 #print(text_list[22])
 #print(subtext_list[22])

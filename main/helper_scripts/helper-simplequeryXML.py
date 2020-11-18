@@ -6,7 +6,7 @@
 import subprocess
 import requests
 
-query = {'animals'}
+query = {'washboard'}
 r = requests.get('http://opml.radiotime.com/Search.ashx?query=' + str(query))
 print(r.text)
 #print(r.headers)
