@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-# for this test, just going to try to isolate how to cut out stations that are not live. if item=station, its live. if topic=topic, its a recorded episode
-# this is successful but now I still have issue with some urls returning a huge list of urls, and that doesn't work, it glitches out vlc since there is no url to isolate
+# for this test, going to try to take the filtered list (only live stations) and eliminate anything where a endpoint url gives an xml stylesheet instead of just playing the station, because that's a problem 
+# i note that URLs that lead to XML sheets with recordings (even if they are item=station) all have URLs with "pbrowse" or "Browse.ashx" in them
 
 # reference for xml module
 # https://docs.python.org/3/library/xml.etree.elementtree.html
@@ -84,33 +84,44 @@ def stationsfilter(item_list, URL_list, text_list, subtext_list, key_list, track
        # print(URLs[i])
     return items, URLs, texts, subtexts, keys, tracks       
    
+def randomselect(items, URLs, texts, subtexts, keys, tracks):     
+    total_stations = len(URLs)
+    selected = random.randrange(1, total_stations, 1)
+    random_URL = URLs[selected]
+    random_text = texts[selected]
+    random_subtext = subtexts[selected]
+  # random_key = keys[selected]
+    random_track = tracks[selected]
+    return total_stations, selected, random_URL, random_text, random_subtext, random_track
+            
 
-def randomselect(items, URLs, texts, subtexts, keys, tracks):    
-    
-    while True:    
-        try:        
-            total_stations = len(URLs)
-            selected = random.randrange(1, total_stations, 1)
-            print("=========================================================")
-            print("Station " + str(selected) + " randomly selected out of " + str(total_stations) + " total stations found") # add function here for the keyword used for the search?
-            print("=========================================================")
-            print("Station Name: " + texts[(selected)])  
-            print("---------------------------------------------------------")
-            print("Station Type: " + items[selected])
-            print("Note: " + subtexts[selected]) 
-            print("URL: " + URLs[selected])
-            url = requests.get(URLs[(selected)])
-            url = url.text
-            print(url)
-            stream()
-           #cmd = 'cvlc -I dummy --no-video --aout=alsa --alsa-audio-device default --file-logging --logfile=vlc-log.txt --verbose 3 ' +  str(url.text)
-           #args = shlex.split(cmd)
-           #print(args)
-           #subprocess.run(args, shell=False) 
-       # except subprocess.TimeoutExpired:
-           # print("connection timeout") 
-        except: 
-           print('all done, bye')
+
+#def randomselect(items, URLs, texts, subtexts, keys, tracks):     
+#            total_stations = len(URLs)
+#            selected = random.randrange(1, total_stations, 1)
+#            print("=========================================================")
+#            print("Station " + str(selected) + " randomly selected out of " + str(total_stations) + " total stations found") # add function here for the keyword used for the search?
+#            print("=========================================================")
+#            print("Station Name: " + texts[(selected)])  
+#            print("---------------------------------------------------------")
+#            print("Station Type: " + items[selected])
+#            print("Note: " + subtexts[selected]) 
+#            print("URL: " + URLs[selected])
+#            url = requests.get(URLs[(selected)])
+#            url = url.text
+#            print(url)
+
+def stream(total_stations, selected, random_URL, random_text, random_subtext, random_track):
+    try:
+        cmd = 'cvlc -I dummy --no-video --aout=alsa --alsa-audio-device default --file-logging --logfile=vlc-log.txt --verbose 3 ' + str(random_URL)
+        args = shlex.split(cmd)
+        print("TEST")
+#        print("testing connection to station " + str(selected) + " randomly selected out of " + str(total_stations) + "." 
+#        print(args)
+        subprocess.run(args, shell=False)
+    except subprocess.TimeoutExpired:
+        print("connection timeout") 
+
 
 def gather_stream():
     # first we get raw xml from tunein query 
@@ -122,8 +133,10 @@ def gather_stream():
     [item_list, URL_list, text_list, subtext_list, key_list, track_list] = iterate(set_root)
     # now we filter those lists to check for what is a live station and what isn't
     [items, URLs, texts, subtexts, keys, tracks] = stationsfilter(item_list, URL_list, text_list, subtext_list, key_list, track_list) 
-    # now we place these new filtered lists into randomselect function and print what we've selected
-    randomselect(items, URLs, texts, subtexts, keys, tracks)
+    # now we place these new filtered lists into randomselect function and stream
+    [random_URL, random_text, random_subtext, random_track] = randomselect(items, URLs, texts, subtexts, keys, tracks)
+    stream(random_URL, random_text, random_subtext, random_track)
+
 
 gather_stream()
 
