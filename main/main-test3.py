@@ -14,7 +14,6 @@ import random
 import shlex
 from shlex import split
 
-
 # specify the search query and send http request to TuneIn API 
 
 def tunein_query():
@@ -26,20 +25,13 @@ def xml_parse(raw_query_result):
     # set the XML document root of the http response XML page
     root = ET.fromstring(raw_query_result)
     # setting variables that hold empty lists so we can append strings to the list
-    x = 0 
-    item_list = []
-    URL_list = []
-    text_list = []
-    subtext_list = []
-    key_list = []
-    track_list = []
     return root
 
 # for loop going through each string in 'outline' from the XML output 
 # and appending each string to the respective list variable
 
 def iterate(set_root):
-    item_list, URL_list, text_list, subtext_list, key_list, track_list, station_data = [], [], [], [], [], [], []
+    item_list, URL_list, text_list, subtext_list, track_list, station_data = [], [], [], [], [], []
     root = set_root 
     for child in root.iter('outline'): 
         line_no = 0
@@ -56,17 +48,14 @@ def iterate(set_root):
         if 'subtext' in child.attrib:
             subtext = child.attrib['subtext']
             subtext_list.append(subtext)
-        if 'key' in child.attrib:
-            key = child.attrib['key']
-            key_list.append(key)
         if 'current_track' in child.attrib:
             track = child.attrib['current_track']
             track_list.append(track) 
-    return item_list, URL_list, text_list, subtext_list, key_list, track_list
+    return item_list, URL_list, text_list, subtext_list, track_list
 
 # this function seperates out anything that is not "item=station" which removes anything that isn't a live show 
 
-def stationsfilter(item_list, URL_list, text_list, subtext_list, key_list, track_list):
+def stationsfilter(item_list, URL_list, text_list, subtext_list, track_list):
     items, URLs, texts, subtexts, keys, tracks = [], [], [], [], [], []
     for i in range(len(item_list)):
        if (item_list[i]) == "topic":
@@ -77,24 +66,21 @@ def stationsfilter(item_list, URL_list, text_list, subtext_list, key_list, track
        URLs.append(URL_list[i])
        texts.append(text_list[i])
        subtexts.append(subtext_list[i])
-      # keys.append(key_list[i])
        tracks.append(track_list[i])
        # this shows me only stations are returning
        # print(items[i])
        # print(URLs[i])
-    return items, URLs, texts, subtexts, keys, tracks       
+    return items, URLs, texts, subtexts, tracks       
+    
    
-def randomselect(items, URLs, texts, subtexts, keys, tracks):     
+def randomselect(items, URLs, texts, subtexts, tracks):     
     total_stations = len(URLs)
     selected = random.randrange(1, total_stations, 1)
     random_URL = URLs[selected]
     random_text = texts[selected]
     random_subtext = subtexts[selected]
-  # random_key = keys[selected]
     random_track = tracks[selected]
-    return total_stations, selected, random_URL, random_text, random_subtext, random_track
-            
-
+    return items, random_URL, random_text, random_subtext, random_track          
 
 #def randomselect(items, URLs, texts, subtexts, keys, tracks):     
 #            total_stations = len(URLs)
@@ -111,7 +97,9 @@ def randomselect(items, URLs, texts, subtexts, keys, tracks):
 #            url = url.text
 #            print(url)
 
-def stream(total_stations, selected, random_URL, random_text, random_subtext, random_track):
+# removing total stations here, should log it somewhere though, was giving error could not return it from above function
+
+def stream(random_URL, random_text, random_subtext, random_track):
     try:
         cmd = 'cvlc -I dummy --no-video --aout=alsa --alsa-audio-device default --file-logging --logfile=vlc-log.txt --verbose 3 ' + str(random_URL)
         args = shlex.split(cmd)
@@ -130,13 +118,12 @@ def gather_stream():
     set_root = xml_parse(raw_query_result)
     # then iterate through the xml document children of 'outline' where the tunein results are
     # place the lists that we created into a list of lists 
-    [item_list, URL_list, text_list, subtext_list, key_list, track_list] = iterate(set_root)
+    [item_list, URL_list, text_list, subtext_list, track_list] = iterate(set_root)
     # now we filter those lists to check for what is a live station and what isn't
-    [items, URLs, texts, subtexts, keys, tracks] = stationsfilter(item_list, URL_list, text_list, subtext_list, key_list, track_list) 
+    [items, URLs, texts, subtexts, tracks] = stationsfilter(item_list, URL_list, text_list, subtext_list, track_list) 
     # now we place these new filtered lists into randomselect function and stream
-    [random_URL, random_text, random_subtext, random_track] = randomselect(items, URLs, texts, subtexts, keys, tracks)
-    stream(random_URL, random_text, random_subtext, random_track)
-
+    [item, random_URL, random_text, random_subtext, random_track] = randomselect(items, URLs, texts, subtexts, tracks)
+    stream(random_URL, random_text, random_subtext, random_track) 
 
 gather_stream()
 
