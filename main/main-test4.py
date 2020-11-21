@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
-# for this test, going to try to take the filtered list (only live stations) and eliminate anything where a endpoint url gives an xml stylesheet instead of just playing the station, because that's a problem 
+# can now only flilter on live stations
+# still need to eliminate anything where a endpoint url gives an xml stylesheet instead of just playing the station, because that's a problem 
 # i note that URLs that lead to XML sheets with recordings (even if they are item=station) all have URLs with "pbrowse" or "Browse.ashx" in them
+# also need to add some kind of basic logging
 
 # reference for xml module
 # https://docs.python.org/3/library/xml.etree.elementtree.html
@@ -80,6 +82,11 @@ def randomselect(items, URLs, texts, subtexts, tracks):
     random_text = texts[selected]
     random_subtext = subtexts[selected]
     random_track = tracks[selected]
+    print (random_text)
+    print (random_subtext)
+    print (random_track)
+    print (random_URL)
+    # will need to add a way to check real URL somewhere)
     return items, random_URL, random_text, random_subtext, random_track          
 
 #def randomselect(items, URLs, texts, subtexts, keys, tracks):     
@@ -103,7 +110,7 @@ def stream(random_URL, random_text, random_subtext, random_track):
     try:
         cmd = 'cvlc -I dummy --no-video --aout=alsa --alsa-audio-device default --file-logging --logfile=vlc-log.txt --verbose 3 ' + str(random_URL)
         args = shlex.split(cmd)
-        print("TEST")
+        print(args)
 #        print("testing connection to station " + str(selected) + " randomly selected out of " + str(total_stations) + "." 
 #        print(args)
         subprocess.run(args, shell=False)
